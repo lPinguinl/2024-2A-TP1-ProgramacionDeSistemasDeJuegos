@@ -6,7 +6,8 @@ namespace Enemies
     public class EnemyPool : MonoBehaviour
     {
         [SerializeField] private Enemy enemyPrefab;
-        [SerializeField] private int poolSize = 10;
+        [SerializeField] private int poolSize = 160;
+
         private List<Enemy> enemies;
 
         private void Awake()
@@ -15,7 +16,7 @@ namespace Enemies
             for (int i = 0; i < poolSize; i++)
             {
                 Enemy enemy = Instantiate(enemyPrefab);
-                enemy.gameObject.SetActive(false);
+                enemy.gameObject.SetActive(false); // Set inactive
                 enemies.Add(enemy);
             }
         }
@@ -28,19 +29,20 @@ namespace Enemies
                 {
                     enemy.transform.position = position;
                     enemy.gameObject.SetActive(true);
-                    return enemy;
+                    return enemy; // Return the reused enemy
                 }
             }
 
-            // If no inactive enemies are available, create a new one
-            Enemy newEnemy = Instantiate(enemyPrefab, position, Quaternion.identity);
-            enemies.Add(newEnemy);
-            return newEnemy;
+            // If no inactive enemies are available, use the prototype method to create a new one
+            EnemyPrototype newEnemy = enemyPrefab.Clone();
+            newEnemy.transform.position = position;
+            enemies.Add((Enemy)newEnemy);
+            return (Enemy)newEnemy;
         }
 
         public void ReturnEnemy(Enemy enemy)
         {
-            enemy.gameObject.SetActive(false);
+            enemy.gameObject.SetActive(false); // Deactivate the enemy
         }
     }
 }

@@ -3,22 +3,23 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 100;
-    public int CurrentHealth { get; private set; }
+    public float currentHealth { get; private set; } // Make currentHealth a property
 
-    private void Awake()
+    public event System.Action OnDeath; // Event to notify when health reaches zero
+
+    private void OnEnable()
     {
-        CurrentHealth = maxHealth; // Initialize health to maximum
+        currentHealth = maxHealth;
     }
 
     public void TakeDamage(int amount)
     {
-        CurrentHealth -= amount;
-        if (CurrentHealth < 0) CurrentHealth = 0; // Prevent negative health
-    }
+        currentHealth -= amount;
+        if (currentHealth < 0) currentHealth = 0; // Prevent negative health
 
-    public void Heal(int amount)
-    {
-        CurrentHealth += amount;
-        if (CurrentHealth > maxHealth) CurrentHealth = maxHealth; // Prevent exceeding max health
+        if (currentHealth <= 0)
+        {
+            OnDeath?.Invoke(); // Invoke death event
+        }
     }
 }

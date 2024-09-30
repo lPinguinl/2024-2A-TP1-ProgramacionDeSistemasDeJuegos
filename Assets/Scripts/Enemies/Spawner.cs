@@ -5,7 +5,7 @@ namespace Enemies
     public class EnemySpawner : MonoBehaviour
     {
         [SerializeField] private EnemyPool enemyPool;
-        [SerializeField] private float spawnInterval = 3f;
+        [SerializeField] private float spawnInterval = 1f;
 
         private void Start()
         {

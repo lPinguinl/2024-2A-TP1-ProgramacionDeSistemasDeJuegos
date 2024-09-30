@@ -6,32 +6,34 @@ namespace Enemies
     [RequireComponent(typeof(Enemy))]
     public class EnemySfx : MonoBehaviour
     {
-        [SerializeField] private AudioPlayer audioSourcePrefab;
         [SerializeField] private RandomContainer<AudioClipData> spawnClips;
         [SerializeField] private RandomContainer<AudioClipData> explosionClips;
         private Enemy _enemy;
+        private AudioService _audioService;
 
         private void Reset() => FetchComponents();
 
-        private void Awake() => FetchComponents();
-    
+        private void Awake()
+        {
+            FetchComponents();
+            _audioService = FindObjectOfType<AudioService>(); // Find the AudioService instance
+            if (_audioService == null)
+            {
+                Debug.LogError("AudioService not found in the scene!");
+            }
+        }
+
         private void FetchComponents()
         {
-            // "a ??= b" is equivalent to "if(a == null) a = b" 
             _enemy ??= GetComponent<Enemy>();
         }
-        
+
         private void OnEnable()
         {
-            if (!audioSourcePrefab)
-            {
-                Debug.LogError($"{nameof(audioSourcePrefab)} is null!");
-                return;
-            }
             _enemy.OnSpawn += HandleSpawn;
             _enemy.OnDeath += HandleDeath;
         }
-        
+
         private void OnDisable()
         {
             _enemy.OnSpawn -= HandleSpawn;
@@ -40,25 +42,21 @@ namespace Enemies
 
         private void HandleDeath()
         {
-            PlayRandomClip(explosionClips, audioSourcePrefab);
+            PlayRandomClip(explosionClips);
         }
 
         private void HandleSpawn()
         {
-            PlayRandomClip(spawnClips, audioSourcePrefab);
+            PlayRandomClip(spawnClips);
         }
 
-        private void PlayRandomClip(RandomContainer<AudioClipData> container, AudioPlayer sourcePrefab)
+        private void PlayRandomClip(RandomContainer<AudioClipData> container)
         {
             if (!container.TryGetRandom(out var clipData))
                 return;
-            
-            SpawnSource(sourcePrefab).Play(clipData);
-        }
 
-        private AudioPlayer SpawnSource(AudioPlayer prefab)
-        {
-            return Instantiate(prefab, transform.position, transform.rotation);
+            // Call the AudioService to play the audio clip instead of instantiating AudioPlayer
+            _audioService?.PlayAudio(clipData);
         }
     }
 }

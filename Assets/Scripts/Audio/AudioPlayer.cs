@@ -3,11 +3,12 @@ using UnityEngine;
 
 namespace Audio
 {
-    [RequireComponent(typeof(AudioClip))]
+    [RequireComponent(typeof(AudioSource))]
     public class AudioPlayer : MonoBehaviour
     {
-        [SerializeField] private OnFinishAction finishAction;
         private AudioSource _source;
+        private AudioService _audioService;
+
         public AudioSource Source
         {
             get
@@ -16,41 +17,19 @@ namespace Audio
                 return _source;
             }
         }
-        
-        public enum OnFinishAction
-        {
-            None,
-            Destroy,
-            Deactivate,
-        }
-        
+
         public void Play(AudioClipData data)
         {
             Source.loop = data.Loop;
             Source.clip = data.Clip;
             Source.outputAudioMixerGroup = data.Group;
             Source.Play();
-            var clipLength = data.Clip.length;
-            if (finishAction == OnFinishAction.Destroy)
-            {
-                StartCoroutine(DestroySelfIn(clipLength));
-            }
-            else if (finishAction == OnFinishAction.Deactivate)
-            {
-                StartCoroutine(DeactivateIn(clipLength));
-            }
+            StartCoroutine(CheckAudioFinished(data.Clip.length));
         }
 
-        private IEnumerator DestroySelfIn(float seconds)
+        private IEnumerator CheckAudioFinished(float seconds)
         {
-            yield return new WaitForSeconds(Mathf.Max(seconds, 0));
-            Destroy(gameObject);
-        }
-        
-        private IEnumerator DeactivateIn(float seconds)
-        {
-            yield return new WaitForSeconds(Mathf.Max(seconds, 0));
-            gameObject.SetActive(false);
+            yield return new WaitForSeconds(seconds);
         }
     }
 }

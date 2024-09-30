@@ -1,32 +1,53 @@
+using System.Collections;
+using Enemies;
 using UnityEngine;
 
 namespace Structures
 {
-    [RequireComponent(typeof(Health))] // Ensure Health component is also required
+    [RequireComponent(typeof(Health))]
     public class Structure : MonoBehaviour
     {
-        private Health healthComponent; // Reference to the Health component
+        private Health healthComponent;
+        
+        [SerializeField]private int damage;
 
-        private void Awake()
+        [SerializeField]private float attackCooldown;
+
+        private void OnEnable()
         {
-            healthComponent = GetComponent<Health>(); // Get the Health component
+            healthComponent = GetComponent<Health>();
+            healthComponent.OnDeath += Die; // Subscribe to death event
         }
 
-        // Example method for taking damage from an enemy
+        private void OnDisable()
+        {
+            healthComponent.OnDeath -= Die; // Unsubscribe to avoid memory leaks
+        }
+
         public void TakeDamage(int amount)
         {
             healthComponent.TakeDamage(amount);
-            if (healthComponent.CurrentHealth <= 0)
+        }
+        
+        private void OnCollisionStay(Collision other)
+        {
+            if (other.gameObject.CompareTag("Enemy"))
             {
-                Die(); // Call Die if health is zero or below
+                other.gameObject.GetComponent<Enemy>().TakeDamage(damage);
+                
+                StartCoroutine(AttackCooldown());
             }
+        }
+        
+        IEnumerator AttackCooldown()
+        {
+            yield return new WaitForSeconds(attackCooldown);
         }
 
         private void Die()
         {
-            // Logic for what happens when the structure dies
             Debug.Log($"{name} has been destroyed!");
-            Destroy(gameObject); // Destroy the structure object
+            Destroy(gameObject); // Destroy the structure
         }
     }
 }
