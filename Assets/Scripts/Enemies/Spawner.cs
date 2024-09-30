@@ -1,29 +1,21 @@
-using System;
-using System.Collections;
 using UnityEngine;
 
-public class Spawner : MonoBehaviour
+namespace Enemies
 {
-    [SerializeField] private GameObject characterPrefab;
-    [SerializeField] private int spawnsPerPeriod = 10;
-    [SerializeField] private float frequency = 30;
-    [SerializeField] private float period = 0;
-
-    private void OnEnable()
+    public class EnemySpawner : MonoBehaviour
     {
-        if (frequency > 0) period = 1 / frequency;
-    }
+        [SerializeField] private EnemyPool enemyPool;
+        [SerializeField] private float spawnInterval = 3f;
 
-    private IEnumerator Start()
-    {
-        while (!destroyCancellationToken.IsCancellationRequested)
+        private void Start()
         {
-            for (int i = 0; i < spawnsPerPeriod; i++)
-            {
-                Instantiate(characterPrefab, transform.position, transform.rotation);
-            }
+            InvokeRepeating(nameof(SpawnEnemy), 0f, spawnInterval);
+        }
 
-            yield return new WaitForSeconds(period);
+        private void SpawnEnemy()
+        {
+            Vector3 spawnPosition = transform.position;
+            enemyPool.GetEnemy(spawnPosition); // Spawn the enemy from the pool
         }
     }
 }
