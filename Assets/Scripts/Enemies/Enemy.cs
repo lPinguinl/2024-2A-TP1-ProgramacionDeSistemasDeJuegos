@@ -13,8 +13,8 @@ namespace Enemies
         [SerializeField] private NavMeshAgent agent;
 
         private Health healthComponent;
-        private EnemyPool enemyPool; // Reference to the enemy pool
-        [SerializeField] private EnemyData enemyData; // Reference to the Scriptable Object
+        private EnemyPool enemyPool; 
+        [SerializeField] private EnemyData enemyData;
 
         public event Action OnSpawn = delegate { };
         public event Action OnDeath = delegate { };
@@ -41,24 +41,23 @@ namespace Enemies
 
         private IEnumerator InitializePath()
         {
-            yield return null; // Wait for a frame
+            yield return null; 
 
-            // Find all GameObjects with the tag "TownCenter"
+            
             GameObject[] townCenters = GameObject.FindGameObjectsWithTag("TownCenter");
             if (townCenters.Length == 0)
             {
                 Debug.LogError($"{name}: Found no TownCenters!! :(");
-                yield break; // Exit if no TownCenters are found
+                yield break; 
             }
-
-            // Select a random TownCenter from the list
+            
             GameObject randomTownCenter = townCenters[UnityEngine.Random.Range(0, townCenters.Length)];
 
             var destination = randomTownCenter.transform.position;
             destination.y = transform.position.y;
 
-            agent.enabled = true; // Ensure NavMeshAgent is enabled
-            agent.SetDestination(destination); // Set the destination
+            agent.enabled = true; 
+            agent.SetDestination(destination); 
             
             Debug.Log($"{name} is moving towards {randomTownCenter.name} at {destination}");
             
@@ -76,7 +75,7 @@ namespace Enemies
             if (agent.hasPath && Vector3.Distance(transform.position, agent.destination) <= agent.stoppingDistance)
             {
                 Debug.Log($"{name}: I'll attack the TownCenter!");
-                Die(); // Call Die when reaching the destination
+                Die(); 
             }
         }
 
@@ -84,7 +83,7 @@ namespace Enemies
         {
             if (other.gameObject.CompareTag("TownCenter"))
             {
-                other.gameObject.GetComponent<Structure>().TakeDamage(enemyData.damage); // Use Flyweight data from Scriptable Object
+                other.gameObject.GetComponent<Structure>().TakeDamage(enemyData.damage); 
                 StartCoroutine(AttackCooldown());
             }
         }
@@ -92,7 +91,7 @@ namespace Enemies
         private void Die()
         {
             OnDeath();
-            enemyPool.ReturnEnemy(this); // Return the enemy to the pool
+            enemyPool.ReturnEnemy(this); 
         }
 
         public void TakeDamage(int amount)
@@ -102,13 +101,13 @@ namespace Enemies
 
         private IEnumerator AttackCooldown()
         {
-            yield return new WaitForSeconds(enemyData.attackCooldown); // Use Flyweight data from Scriptable Object
+            yield return new WaitForSeconds(enemyData.attackCooldown); 
         }
 
         public override EnemyPrototype Clone()
         {
-            Enemy clone = Instantiate(this); // Create a new instance of the enemy
-            clone.enemyData = this.enemyData; // Share the same data reference
+            Enemy clone = Instantiate(this); 
+            clone.enemyData = this.enemyData; 
             return clone;
         }
     }

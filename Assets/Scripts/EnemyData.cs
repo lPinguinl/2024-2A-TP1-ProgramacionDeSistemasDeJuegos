@@ -7,6 +7,6 @@ namespace Enemies
     {
         public int damage;
         public float attackCooldown;
-        public string enemyType; // Optional for type identification
+        public string enemyType; 
     }
 }
